@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Photo</string>
+    <string name="sgin_in" translatable="false">Đăng Nhập</string>
+    <string name="welcome_back" translatable="false">Xin Chào</string>
+    <string name="hintAccount">Tài Khoản</string>
+    <string name="hintPassword" translatable="false">Mật Khẩu</string>
+    <string name="sign_up_Account" translatable="false">Tạo tài khoản</string>
+    <string name="Name_Account" translatable="false">Tên tài khoản:</string>
+    <string name="Pass_Account" translatable="false">Mật khẩu:</string>
+    <string name="hintGmail" translatable="false">Gmail</string>
+    <string name="hintPhone" translatable="false">Số điện thoạt</string>
+    <string name="hintPassword_Verify" translatable="false">Nhập lại mật khậu</string>
+    <string name="Sign_up" translatable="false">Đăng ký</string>
+    <string name="textCreateNewAccount" translatable="false">Tạo tài khoản</string>
+    <string name="text_add_image" translatable="false">Thêm ảnh</string>
+    <string name="search" translatable="false">Tìm kiếm</string>
+    <string name="select_user" translatable="false">Tên</string>
+    <string name="type_a_message" translatable="false">Type a message</string>
+    <string name="item1" translatable="false">Dam may</string>
+    <string name="item2" translatable="false">Cai Dat</string>
+    <string name="item3" translatable="false">Cá nhân</string>
+    <string name="title_activity_add_user" translatable="false">AddUser</string>
+    <string name="Chek_email">email đã tồn tại</string>
+    <string name="dialog_title">Thông báo</string>
+    <string name="ok">OK</string>
+    <string name="internal_storage">Internal storage</string>
+</resources>
