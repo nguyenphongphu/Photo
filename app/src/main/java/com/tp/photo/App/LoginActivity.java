@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                   // Log.d(TAG, "onResponse: " + response.body());
+                    Log.d(TAG, "onResponse: " + response.body());
                 }
 
             }

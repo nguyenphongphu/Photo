@@ -9,15 +9,21 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
+
 
 import androidx.loader.content.CursorLoader;
 
+import com.tp.photo.Model.ListData;
+
 import java.io.File;
 import java.io.FilenameFilter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
@@ -243,7 +249,47 @@ public class RealPathUtil {
         }
         return fileList;
     }
+    public static List<ListData> findFileInDirectory(String directory, String[] Types){
+        final List<ListData> fileData=new ArrayList<>();
+        List<String> LTemp=new ArrayList<>();
+        FilenameFilter[] filter = new FilenameFilter[Types.length];
 
+        int i = 0;
+        for (final String type : Types) {
+            filter[i] = new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return name.endsWith("." + type);
+                }
+            };
+            i++;
+        }
+        File[] allMatchingFiles = listFilesAsArray(
+                new File(directory), filter, -1);
+        Arrays.sort(allMatchingFiles, new Comparator<File>() {
+            public int compare(File f1, File f2) {
+                return Long.compare(f2.lastModified(),f1.lastModified());
+            }
+        });
+        Log.d("TAG", "findFileInDirectory: "+allMatchingFiles.length
+        );
+        for(int a=0;a<allMatchingFiles.length;a++){
+            if(allMatchingFiles[a]!=null){
+                Date lastModDate = new Date(allMatchingFiles[a].lastModified());
+                LTemp.add(allMatchingFiles[a].getAbsolutePath());
+                for (int b = 1; b < allMatchingFiles.length; b++) {
+                    if(allMatchingFiles[b]!=null){
+                        Date lastModDatej = new Date(allMatchingFiles[b].lastModified());
+                        if (lastModDate.getTime()==lastModDatej.getTime()) {
+                            LTemp.add(allMatchingFiles[b].getAbsolutePath());
+                        }
+                    }
+                }
+                fileData.add(new ListData(new SimpleDateFormat("dd-MM").format(lastModDate),LTemp));
+                LTemp.clear();
+            }
+        }
+        return fileData;
+    }
     public static List<String> findImageFileInDirectory(String directory, String[] imageTypes) {
         final List<String> tFileList = new ArrayList<>();
         FilenameFilter[] filter = new FilenameFilter[imageTypes.length];
@@ -262,7 +308,7 @@ public class RealPathUtil {
                 new File(directory), filter, -1);
         Arrays.sort(allMatchingFiles, new Comparator<File>() {
             public int compare(File f1, File f2) {
-                return Long.compare(f1.lastModified(), f2.lastModified());
+                return Long.compare(f2.lastModified(), f1.lastModified());
             }
         });
         for (File f : allMatchingFiles) {

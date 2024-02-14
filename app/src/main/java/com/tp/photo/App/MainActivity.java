@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -42,6 +43,7 @@ import com.tp.photo.Model.ListData;
 import com.tp.photo.Model.Photo;
 import com.tp.photo.R;
 import com.tp.photo.Utility.Constants;
+import com.tp.photo.Utility.PaginationScrollListener;
 import com.tp.photo.Utility.selectionSort;
 import com.tp.photo.Utility.PreferenceManager;
 import com.tp.photo.Utility.RealPathUtil;
@@ -71,6 +73,14 @@ public class MainActivity extends AppCompatActivity {
     private final String DIRECTORY = Environment.getExternalStorageDirectory().toString();
     private static final String TAG="MainActivity";
     private List<String> mFiles;
+    private LinearLayoutManager linearLayoutManager;
+    private boolean isLoading;
+    private boolean isLastPage;
+    private int currentPage=1;
+    private int totalPage=5;
+    private int intFile;
+    private List<ListData> listData;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +88,9 @@ public class MainActivity extends AppCompatActivity {
         preferenceManager =new PreferenceManager(getApplicationContext());
         binding=ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.recyclerview.setLayoutManager(new LinearLayoutManager(this));
+        listData=new ArrayList<>();
+        linearLayoutManager=new LinearLayoutManager(this);
+        binding.recyclerview.setLayoutManager(linearLayoutManager);
         loadUserDetails();
         SetOnClick();
     }
@@ -223,39 +235,69 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, 100);
     }
     private void loadData() {
+       // mFiles=RealPathUtil.findFileInDirectory(DIRECTORY,new String[]{"png", "jpg","jpeg","webp","mp4"});
         mFiles = RealPathUtil.findImageFileInDirectory(DIRECTORY, new String[]{"png", "jpg","jpeg","webp","mp4"});
-        List<ListData> listData=new ArrayList<>();
-
-        for(int i=0;i<mFiles.size();i++){
+        intFile=mFiles.size()/5;
+        for(int i=0;i<intFile;i++){
             if(mFiles.get(i)!=null){
-                List<String> list = new ArrayList<>();
-                list.add(mFiles.get(i));
+                List<String> list1 = new ArrayList<>();
+                list1.add(mFiles.get(i));
                 File file = new File(mFiles.get(i));
                 Date lastModDate = new Date(file.lastModified());
-                Log.d(TAG, "loadData: "+mFiles.size());
                 mFiles.remove(i);
-                for (int j = i + 1; j < mFiles.size(); j++) {
-                    Log.d(TAG, "loadData: "+mFiles.size());
+                for (int j = 1; j <= intFile; j++) {
                     if(mFiles.get(j)!=null){
                         File filej = new File(mFiles.get(j));
                         Date lastModDatej = new Date(filej.lastModified());
-                        if (lastModDate.getDay() == lastModDatej.getDay()&&
-                                lastModDate.getMonth()==lastModDatej.getMonth() &&
-                                lastModDate.getYear()==lastModDatej.getYear()) {
-                            list.add(mFiles.get(j));
+                        if (lastModDatej.getDay()==lastModDate.getDay()&&lastModDatej.getMonth()==lastModDate.getMonth()&&lastModDate.getYear()==lastModDatej.getYear()) {
+                            list1.add(mFiles.get(j));
                             mFiles.remove(j);
                         }
                     }
                 }
-                Log.i(TAG, "onPermissionsChecked " + list + "\n");
-                listData.add(new ListData(new SimpleDateFormat("dd-MM").format(lastModDate), list));
+                listData.add(new ListData(new SimpleDateFormat("dd-MM").format(lastModDate), list1));
             }
         }
         dataAdapter =new GalleryAdapter(MainActivity.this,listData);
         binding.recyclerview.setAdapter(dataAdapter);
+        binding.recyclerview.addOnScrollListener(new PaginationScrollListener(linearLayoutManager) {
+            @Override
+            public void loadMoreItem() {
+                isLoading=true;
+                binding.progressbar.setVisibility(View.VISIBLE);
+                currentPage+=1;
+                loadNextPage();
+            }
+
+            @Override
+            public boolean isloading() {
+                return isLoading;
+            }
+
+            @Override
+            public boolean isLastPage() {
+                return isLastPage;
+            }
+        });
         Toast.makeText(getApplicationContext(), "All permissions are granted!", Toast.LENGTH_SHORT).show();
         binding.recyclerview.setHasFixedSize(true);
         binding.progressbar.setVisibility(View.INVISIBLE);
+    }
+    private void loadNextPage(){
+        Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                dataAdapter.notifyDataSetChanged();
+                isLoading=false;
+                binding.progressbar.setVisibility(View.GONE);
+                if(currentPage==totalPage){
+                    isLastPage=true;
+                }
+            }
+        },2000);
+
     }
     private void loadserver( List<String> mfile){
         Log.d(TAG, "load: " +mfile.size());
@@ -288,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
                 int i=  item.getItemId();
                 if(R.id.item1==i){
                     try {
-                        loadserver(mFiles);
+                        //loadserver(mFiles);
 
                     }catch (Exception e){
                         Log.d(TAG, "Upload_data: loi "+e);

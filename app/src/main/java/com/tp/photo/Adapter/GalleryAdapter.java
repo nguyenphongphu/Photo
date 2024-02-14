@@ -30,7 +30,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.CustomVi
     private final List<ListData> mData;
     private final Activity mActivity;
     private static final String TAG="MainActivity";
-
     public GalleryAdapter(Activity activity, List<ListData> fileList) {
         mActivity = activity;
         mData = fileList;
